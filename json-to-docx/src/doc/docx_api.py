@@ -826,6 +826,10 @@ class Row(object):
         self._docx = docx
         self.row_num, self.section_width, self.column_widths, self.row_height, self.document_nesting_depth = row_num, section_width, column_widths, row_height, document_nesting_depth
         self.row_name = f"row: [{self.row_num+1}]"
+        self.fixed_row_height = False
+
+        if self.row_height < (ROW_HEIGHT_WHEN_FIT_TO_DATA/PIXEL_PER_INCH_FOR_ROW_HEIGHT):
+            self.fixed_row_height = True
 
         self.cells = []
         c = 0
@@ -841,6 +845,9 @@ class Row(object):
     def row_to_doc_table_row(self, table, table_row, nesting_level=0):
         # trace(f"{self}")
         table_row.height = Inches(self.row_height)
+
+        if self.fixed_row_height:
+            table_row.height = Inches(self.fixed_row_height)
 
         # iterate over the cells
         for cell_index in range(0, len(self.cells)):

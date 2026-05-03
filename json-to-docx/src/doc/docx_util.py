@@ -2114,7 +2114,7 @@ def inches_to_pt(inches, nesting_level=0):
 	a reasonable approximation is what gsheet says 21 pixels, renders well as 12 pixel (assuming our normal text is 10-11 in size)
 '''
 def row_height_in_inches(pixel_size, nesting_level=0):
-	return float((pixel_size) / 96)
+	return float((pixel_size) / PIXEL_PER_INCH_FOR_ROW_HEIGHT)
 
 
 ''' get a random string
@@ -2440,6 +2440,12 @@ INCHES_PER_PT = 72
 
 # default DPI
 DPI = 72
+
+# pixel per inch for row height calculation
+PIXEL_PER_INCH_FOR_ROW_HEIGHT = 96
+
+# row height in pixel when set to automatic (Fit to Data)
+ROW_HEIGHT_WHEN_FIT_TO_DATA = 21
 
 # default cell margin for image inside a cell
 CELL_MARGIN_FOR_IMAGE_IN_PT = 0

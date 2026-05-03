@@ -27,7 +27,7 @@ from docx.opc.constants import RELATIONSHIP_TYPE as RT
 from docx.shared import Pt, Cm, Inches, RGBColor
 
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_ROW_HEIGHT_RULE
 from docx.enum.section import WD_SECTION, WD_ORIENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.dml import MSO_THEME_COLOR_INDEX

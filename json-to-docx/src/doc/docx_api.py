@@ -848,6 +848,7 @@ class Row(object):
 
         if self.fixed_row_height:
             table_row.height = Inches(self.row_height)
+            table_row.height_rule = WD_ROW_HEIGHT_RULE.EXACTLY
 
         # iterate over the cells
         for cell_index in range(0, len(self.cells)):

@@ -290,7 +290,8 @@ def insert_cell_image(cell, inline_image, container_width, container_height, nes
         'right bottom':  {'h': 'right',  'v': 'bottom'},
     }
     
-    aligns = mapping.get(inline_image.position, mapping['center middle'])
+    positions = f"{inline_image.halign} {inline_image.valign}"
+    aligns = mapping.get(positions, mapping['center middle'])
     paragraph = cell.paragraphs[0]
     paragraph.clear()
     run = paragraph.add_run()

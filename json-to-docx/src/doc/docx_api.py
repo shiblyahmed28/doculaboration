@@ -847,7 +847,7 @@ class Row(object):
         table_row.height = Inches(self.row_height)
 
         if self.fixed_row_height:
-            table_row.height = Inches(self.fixed_row_height)
+            table_row.height = Inches(self.row_height)
 
         # iterate over the cells
         for cell_index in range(0, len(self.cells)):

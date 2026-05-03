@@ -508,7 +508,7 @@ class OdtContent(object):
             first_cell.merge_spec.row_span = row_span
 
             # considering merges, we have effective cell width and height
-            first_cell.effective_cell_width = sum(first_cell.column_widths[first_cell.col_num:first_cell.col_num + col_span])
+            first_cell.change_effective_width(new_effective_width=sum(first_cell.column_widths[first_cell.col_num:first_cell.col_num + col_span]))
             effective_row_height = 0
             for r in range(first_row, last_row):
                 effective_row_height = effective_row_height + self.cell_matrix[r].row_height
@@ -967,7 +967,10 @@ class Cell(object):
                     self.inline_images.append(InlineImage(ii_dict, nesting_level=nesting_level+1))
                 
             note_dict = self.value.get('notes', {})
-            self.note = CellNote(document_nesting_depth=self.document_nesting_depth, note_dict=note_dict, nesting_level=nesting_level+1)
+            # TODO: if the cell is less than CELL_WIDTH_RATIO_TO_FORCE_HALIGN_TRUE
+            cell_width_ratio = self.effective_cell_width / sum(self.column_widths)
+            halign_to_be_forced = (CELL_WIDTH_RATIO_TO_FORCE_HALIGN_TRUE > cell_width_ratio)
+            self.note = CellNote(document_nesting_depth=self.document_nesting_depth, note_dict=note_dict, halign_to_be_forced=halign_to_be_forced, nesting_level=nesting_level+1)
 
             self.formatted_value = self.value.get('formattedValue', '')
 
@@ -1154,6 +1157,15 @@ class Cell(object):
         # s = f"{self.cell_name:>4}, value: {not self.is_empty:<1}, mr: {self.merge_spec.multi_row:<9}, mc: {self.merge_spec.multi_col:<9} [{self.effective_format.borders}]"
         return s
 
+
+    ''' change effective cell width
+    '''
+    def change_effective_width(self, new_effective_width):
+        self.effective_cell_width = new_effective_width
+        # TODO: as cell width has changed it may affect "force-halign"
+        cell_width_ratio = self.effective_cell_width / sum(self.column_widths)
+        halign_to_be_forced = (CELL_WIDTH_RATIO_TO_FORCE_HALIGN_TRUE > cell_width_ratio)
+        self.note.enforce_halign(halign_to_be_forced=halign_to_be_forced)
 
 
 ''' gsheet cell value object wrapper
@@ -1910,14 +1922,14 @@ class CellNote(object):
 
     ''' constructor
     '''
-    def __init__(self, document_nesting_depth, note_dict={}, nesting_level=0):
+    def __init__(self, document_nesting_depth, note_dict={}, halign_to_be_forced=False, nesting_level=0):
         self.outline_level = 0
         self.free_content = False
         self.content = note_dict.get('content', None)
         self.style = note_dict.get('style', None)
         self.header_rows = int(note_dict.get('repeat-rows', 0))
         self.new_page = note_dict.get('new-page', False)
-        self.force_halign = note_dict.get('force-halign', False)
+        self.force_halign = note_dict.get('force-halign', halign_to_be_forced)
         self.keep_with_next = note_dict.get('keep-with-next', False)
         self.keep_with_previous = note_dict.get('keep-with-previous', False)
         self.keep_line_breaks = note_dict.get('keep-line-breaks', True)
@@ -1965,6 +1977,12 @@ class CellNote(object):
                 self.bookmark = {}
                 warn(f"found bookmark, but it is not a valid dictionary", nesting_level=nesting_level+1)
 
+
+    ''' enforce halign
+    '''
+    def enforce_halign(self, halign_to_be_forced):
+        self.force_halign = halign_to_be_forced
+        
 
     ''' style attributes dict to create Style
     '''
@@ -2014,11 +2032,15 @@ class InlineImage(object):
         self.anchor_type = 'paragraph'
 
         self.halign, self.valign = 'center', 'center'
-        positions = self.position.split(' ')
-        if len(positions) == 2:
-            self.halign, self.valign = positions[0], positions[1]
-        elif len(positions) == 1:
-            self.halign = positions[0]
+        if isinstance(self.position, str):
+            positions = self.position.split(' ')
+            if len(positions) == 2:
+                self.halign, self.valign = positions[0], positions[1]
+            elif len(positions) == 1:
+                self.halign = positions[0]
+
+        elif isinstance(self.position, dict):
+            self.halign, self.valign = self.position.get('horizontal', 'center'), self.position.get('vertical', 'center')
 
     
     ''' attributes dict for GraphicProperties

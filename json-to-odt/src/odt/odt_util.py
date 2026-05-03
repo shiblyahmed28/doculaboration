@@ -1005,8 +1005,8 @@ def apply_custom_style(style, custom_properties, nesting_level=0):
                         continue
 
                     try:
-                        style_instance.setAttribute(attr, value)
                         # trace(f"{attr} set {type(style_instance)}", nesting_level=nesting_level)
+                        style_instance.setAttribute(attr, value)
                     except:
                         warn(f"{attr} not allowed {type(style_instance)}", nesting_level=nesting_level)
                         pass
@@ -1043,7 +1043,7 @@ def update_style(odt, style_key, style_spec, custom_styles, nesting_level=0):
                             # trace(f"ignoring '{attr}' as it is a dict for [{value}]", nesting_level=nesting_level)
                             continue
 
-                        trace(f"setting '{attr}' to [{value}]", nesting_level=nesting_level)
+                        # trace(f"setting '{attr}' to [{value}]", nesting_level=nesting_level)
                         try:
                             style_instance.setAttribute(attr, value)
                             # trace(f"{attr} set for {type(style_instance)}", nesting_level=nesting_level)
@@ -1061,10 +1061,50 @@ def update_style(odt, style_key, style_spec, custom_styles, nesting_level=0):
                             # trace(f"ignoring '{attr}' as it is a dict for [{value}]", nesting_level=nesting_level)
                             continue
 
-                        trace(f"setting '{attr}' to [{value}]", nesting_level=nesting_level)
+                        # trace(f"setting '{attr}' to [{value}]", nesting_level=nesting_level)
                         try:
-                            style_instance.setAttribute(attr, value)
+                            # HACK: handle bold, italic, oblique, underline, strikethrough
+                            if attr == 'bold':
+                                if value == True:
+                                    style_instance.setAttribute('fontweight', 'bold')
+                                    style_instance.setAttribute('fontweightasian', 'bold')
+                                    style_instance.setAttribute('fontweightcomplex', 'bold')
+
+                                else:
+                                    style_instance.setAttribute('fontweight', 'normal')
+                                    style_instance.setAttribute('fontweightasian', 'normal')
+                                    style_instance.setAttribute('fontweightcomplex', 'normal')
+
+                            elif attr == 'italic' and value == True:
+                                style_instance.setAttribute('fontstyle', 'italic')
+                                style_instance.setAttribute('fontstyleasian', 'italic')
+                                style_instance.setAttribute('fontstylecomplex', 'italic')
+
+                            elif attr == 'oblique' and value == True:
+                                style_instance.setAttribute('fontstyle', 'oblique')
+                                style_instance.setAttribute('fontstyleasian', 'oblique')
+                                style_instance.setAttribute('fontstylecomplex', 'oblique')
+
+                            elif attr == 'underline' and value == True:
+                                style_instance.setAttribute('textunderlinestyle', 'solid')
+                                style_instance.setAttribute('textunderlinewidth', 'auto')
+                                style_instance.setAttribute('textunderlinecolor', 'font-color')
+
+                            elif attr == 'smallcaps' and value == True:
+                                style_instance.setAttribute('fontvariant', 'small-caps')
+
+                            elif attr == 'allcaps' and value == True:
+                                style_instance.setAttribute('texttransform', 'uppercase')
+
+                            elif attr == 'strikethrough' and value == True:
+                                style_instance.setAttribute('textlinethroughstyle', 'solid')
+                                style_instance.setAttribute('textlinethroughtype', 'single')
+
+                            else: 
+                                style_instance.setAttribute(attr, value)
+
                             # trace(f"{attr} set for {type(style_instance)}", nesting_level=nesting_level)
+
                         except:
                             warn(f"{attr} not allowed for {type(style_instance)}", nesting_level=nesting_level)
                             pass
@@ -1661,6 +1701,9 @@ PIXEL_PER_INCH_FOR_ROW_HEIGHT = 96
 
 # row height in pixel when set to automatic (Fit to Data)
 ROW_HEIGHT_WHEN_FIT_TO_DATA = 21
+
+# ratio of the cell width to table width below which we should force "force-halign" so that cell content is not justified and look ugly
+CELL_WIDTH_RATIO_TO_FORCE_HALIGN_TRUE = 0.7
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # gsheet to odt constants and type mapping

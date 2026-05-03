@@ -1897,12 +1897,15 @@ class InlineImage(object):
         self.margin_pt = CELL_MARGIN_FOR_IMAGE_IN_PT
 
         self.halign, self.valign = 'center', 'middle'
-        positions = self.position.split(' ')
-        if len(positions) == 2:
-            self.halign, self.valign = positions[0], positions[1]
+        if isinstance(self.position, str):
+            positions = self.position.split(' ')
+            if len(positions) == 2:
+                self.halign, self.valign = positions[0], positions[1]
+            elif len(positions) == 1:
+                self.halign = positions[0]
 
-        elif len(positions) == 1:
-            self.halign = positions[0]
+        elif isinstance(self.position, dict):
+            self.halign, self.valign = self.position.get('horizontal', 'center'), self.position.get('vertical', 'middle')
 
 
     ''' adjusted image width and height

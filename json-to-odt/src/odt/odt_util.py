@@ -69,6 +69,23 @@ def section_list_to_odt(odt, section_list, nesting_level=0):
 # --------------------------------------------------------------------------------------------------------------------------------------------
 # pictures, background image
 
+''' make an image transparent
+'''
+def add_transparency_to_image(image_path, opacity, nesting_level=0):
+    alpha_value = float(opacity.replace('%', '')) / 100
+    new_image_path = str(Path(image_path).with_suffix('.png'))
+    if alpha_value < 1.0:
+        img = Image.open(image_path).convert("RGBA")
+        alpha = img.split()[3]
+        alpha = alpha.point(lambda p: int(p * alpha_value))
+        img.putalpha(alpha)
+        img.save(new_image_path)
+        return new_image_path
+    
+    return None
+
+
+
 ''' background-image style
     <style:background-image
         xlink:href="Pictures/10000001000007D0000007D0EF304D419C6347C7.png"
@@ -88,8 +105,7 @@ def create_background_image_style(odt, picture_path, opacity='100%', nesting_lev
     # first the image to be added into the document
     href = odt.addPicture(picture_path)
     if href:
-        print(f"[{picture_path}] opacity is {opacity}")
-        background_image_style_attributes = {'href': href, 'opacity': opacity, 'position': 'center center', 'repeat': 'stretch', }
+        background_image_style_attributes = {'href': href, 'opacity': '100%', 'position': 'center center', 'repeat': 'stretch', }
 
         # background_image_style_attributes = {'href': href}
         background_image_style = style.BackgroundImage(attributes=background_image_style_attributes)
@@ -1131,7 +1147,7 @@ def update_style(odt, style_key, style_spec, custom_styles, nesting_level=0):
                 
                 # download image
                 debug(f"downloading inline image {url}", nesting_level=nesting_level+1)
-                ii_image_dict = download_image(drive_service=GoogleServices().drive_api, url=url, title=None, tmp_dir=ConfigService()._temp_dir, nesting_level=nesting_level+1)
+                ii_image_dict = download_image(drive_service=GoogleServices().drive_api, url=url, title=None, tmp_dir=ConfigService()._temp_dir, opacity=ii_dict.get('opacity', '100%'), nesting_level=nesting_level+1)
 
                 # type background/inline
                 ii_image_dict['type'] = ii_dict.get('type', 'background')
@@ -1179,7 +1195,7 @@ def update_style(odt, style_key, style_spec, custom_styles, nesting_level=0):
                 
                 # download image
                 debug(f"downloading inline image {url}", nesting_level=nesting_level+1)
-                pb_image_dict = download_image(drive_service=GoogleServices().drive_api, url=url, title=None, tmp_dir=ConfigService()._temp_dir, nesting_level=nesting_level+1)
+                pb_image_dict = download_image(drive_service=GoogleServices().drive_api, url=url, title=None, tmp_dir=ConfigService()._temp_dir, opacity=pb_dict.get('opacity', '100%'), nesting_level=nesting_level+1)
 
                 # type background/inline
                 pb_image_dict['type'] = 'background'
@@ -1424,7 +1440,7 @@ def create_lot(nesting_level=0):
 ''' download an image from a web or drive url and return a dict
     {'file-path': file-path, 'file-type': file-type, 'image-height': height, 'image-width': width}
 '''
-def download_image(drive_service, url, title, tmp_dir, nesting_level=0):
+def download_image(drive_service, url, title, tmp_dir, opacity='100%', nesting_level=0):
     data = None
     if url.startswith('https://drive.google.com/'):
         data = download_file_from_drive(drive_service=drive_service, url=url, title=title, tmp_dir=tmp_dir, nesting_level=nesting_level)
@@ -1437,12 +1453,17 @@ def download_image(drive_service, url, title, tmp_dir, nesting_level=0):
         warn(f"the url [{url}] is not a drive or web url", nesting_level=nesting_level)
         return None
 
-    # if image, calculate dimensions
+    # if image, handle transparency and calculate dimensions
     if data['file-type'] in IMAGE_MIME_TYPES:
         file_path = data['file-path']
         width, height, dpi_x, dpi_y = image_meta_pillow(file_path, nesting_level=nesting_level)
         data['image-width'] = float(width / dpi_x)
         data['image-height'] = float(height / dpi_y)
+
+        # add transparency
+        new_image_path = add_transparency_to_image(image_path=file_path, opacity=opacity, nesting_level=nesting_level+1)
+        if new_image_path is not None:
+            data['file-path'] = new_image_path
 
     return data
 

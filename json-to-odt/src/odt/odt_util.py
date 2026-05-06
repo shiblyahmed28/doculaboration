@@ -82,13 +82,14 @@ def section_list_to_odt(odt, section_list, nesting_level=0):
         draw:fill-image-ref-point="center"
         draw:tile-repeat-offset="0% vertical"
 '''
-def create_background_image_style(odt, picture_path, nesting_level=0):
+def create_background_image_style(odt, picture_path, opacity='100%', nesting_level=0):
     background_image_style = None
 
     # first the image to be added into the document
     href = odt.addPicture(picture_path)
     if href:
-        background_image_style_attributes = {'href': href, 'opacity': '100%', 'position': 'center center', 'repeat': 'stretch', }
+        print(f"[{picture_path}] opacity is {opacity}")
+        background_image_style_attributes = {'href': href, 'opacity': opacity, 'position': 'center center', 'repeat': 'stretch', }
 
         # background_image_style_attributes = {'href': href}
         background_image_style = style.BackgroundImage(attributes=background_image_style_attributes)
@@ -149,11 +150,11 @@ def create_image_frame(odt, picture_path, graphic_properties_attributes, frame_a
 
 ''' add a background image to a master-page
 '''
-def add_background_image_to_master_page(odt, master_page, background_image_path, nesting_level=0):
+def add_background_image_to_master_page(odt, master_page, background_image_path, opacity='100%', nesting_level=0):
     page_layout_name = master_page.attributes[(master_page.qname[0], 'page-layout-name')]
     page_layout = get_page_layout(odt=odt, page_layout_name=page_layout_name, nesting_level=nesting_level)
 
-    background_image_style = create_background_image_style(odt, background_image_path)
+    background_image_style = create_background_image_style(odt=odt, picture_path=background_image_path, opacity=opacity, nesting_level=nesting_level+1)
     if background_image_style:
         # background_image specific page-layout-properties
         page_layout_attrs = {'fill-image-width': '100%', 'fill-image-height': '100%', 'fill-image-ref-point-x': '0%', 'fill-image-ref-point-y': '0%', 'fill-image-ref-point': 'center', 'tile-repeat-offset': '0% vertical'}
@@ -1182,6 +1183,10 @@ def update_style(odt, style_key, style_spec, custom_styles, nesting_level=0):
 
                 # type background/inline
                 pb_image_dict['type'] = 'background'
+
+                # opacity
+                if 'opacity' in pb_dict:
+                    pb_image_dict['opacity'] = pb_dict['opacity']
 
                 custom_styles[style_key]['page-background'].append(pb_image_dict)
                 # trace(f"downloaded  inline image {url}", nesting_level=nesting_level+1)

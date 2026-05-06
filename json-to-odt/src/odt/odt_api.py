@@ -206,7 +206,7 @@ class OdtSectionBase(object):
                     if 'page-background' in ConfigService()._style_specs[self.heading_style]:
                         for pb_dict in ConfigService()._style_specs[self.heading_style]['page-background']:
                             pb_image = InlineImage(ii_dict=pb_dict)
-                            add_background_image_to_master_page(odt=self._odt, master_page=self.master_page, background_image_path=pb_image.file_path, nesting_level=nesting_level+1)
+                            add_background_image_to_master_page(odt=self._odt, master_page=self.master_page, background_image_path=pb_image.file_path, opacity=pb_image.opacity, nesting_level=nesting_level+1)
 
             else:
                 warn(f"style [{style_name}] not found", nesting_level=nesting_level)
@@ -1051,7 +1051,7 @@ class Cell(object):
 
                         # consider only the first bg image
                         if inline_image.type == 'background':
-                            background_image_style = create_background_image_style(odt=odt, picture_path=inline_image.file_path, nesting_level=nesting_level+1)
+                            background_image_style = create_background_image_style(odt=odt, picture_path=inline_image.file_path, opacity=inline_image.opacity, nesting_level=nesting_level+1)
                             break
 
                         else:
@@ -1061,7 +1061,7 @@ class Cell(object):
             for inline_image in self.inline_images:
                 # now if the background does not have any position, it is to be trated as a background image
                 if inline_image.type == 'background':
-                    background_image_style = create_background_image_style(odt=odt, picture_path=inline_image.file_path, nesting_level=nesting_level+1)
+                    background_image_style = create_background_image_style(odt=odt, picture_path=inline_image.file_path, opacity=inline_image.opacity, nesting_level=nesting_level+1)
 
                 # the image is positioned, it is to be positioned as a non-bg image
                 elif inline_image.type == 'inline':
@@ -2028,6 +2028,7 @@ class InlineImage(object):
         self.keep_aspect_ratio = ii_dict.get('keep-aspect-ratio', True)
         self.position = ii_dict.get('position', 'center center')
         self.wrap = ii_dict.get('wrap', 'parallel')
+        self.opacity = ii_dict.get('opacity', '100%')
 
         self.anchor_type = 'paragraph'
 

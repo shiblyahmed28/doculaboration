@@ -1062,7 +1062,7 @@ class Cell(object):
         table_cell.width = Inches(self.cell_width)
 
         # the cell may have a custom style with a bg image 
-        if self.note.style is not None and self.note.style in ConfigService()._style_specs:
+        if self.note is not None and self.note.style is not None and self.note.style in ConfigService()._style_specs:
             # this custom style may have an inline-image, if so apply it
             if 'inline-image' in ConfigService()._style_specs[self.note.style]:
                 for ii_dict in ConfigService()._style_specs[self.note.style]['inline-image']:

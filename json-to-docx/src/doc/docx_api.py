@@ -1133,12 +1133,14 @@ class Cell(object):
         if self.note:
             force_halign = self.note.force_halign
             angle = self.note.angle
+            custom_style_name = self.note.style 
         else:
             force_halign = False
             angle = 0
+            custom_style_name = None
 
         table_cell_attributes = self.effective_format.table_cell_attributes(cell_merge_spec=self.merge_spec, force_halign=force_halign, angle=angle)
-        format_container(container=self.table_cell, attributes=table_cell_attributes, custom_style_name=self.note.style, it_is_a_table_cell=True, nesting_level=nesting_level+1)
+        format_container(container=self.table_cell, attributes=table_cell_attributes, custom_style_name=custom_style_name, it_is_a_table_cell=True, nesting_level=nesting_level+1)
 
 
     ''' Copy format from the cell passed

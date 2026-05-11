@@ -1123,7 +1123,7 @@ class Cell(object):
                         paragraph.addElement(image_frame)
 
                     # the cell/paragraph may have custom style, if so apply it
-                    if self.note.style is not None and self.note.style in ConfigService()._style_specs:
+                    if self.note is not None and self.note.style is not None and self.note.style in ConfigService()._style_specs:
                         trace(f"applying custom style [{self.note.style}] to {self}", nesting_level=nesting_level)
                         style = get_style_by_name(odt=odt, style_name=paragraph.getAttribute("stylename"), nesting_level=nesting_level+1)
                         apply_custom_style(style=style, custom_properties=ConfigService()._style_specs[self.note.style], nesting_level=nesting_level+1)

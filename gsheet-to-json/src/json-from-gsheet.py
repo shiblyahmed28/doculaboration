@@ -9,7 +9,7 @@ from ggle.google_services import GoogleServices
 from ggle.gsheet_helper import GsheetHelper
 from helper.config_service import ConfigService
 from helper.logger import *
-
+from helper.logger import set_log_file
 
 class JsonFromGsheet(object):
 
@@ -51,5 +51,6 @@ if __name__ == '__main__':
 	ap.add_argument("-g", "--gsheet", required=False, help="gsheet name to override gsheet list provided in configuration")
 	args = vars(ap.parse_args())
 
+	set_log_file("gsheet-to-json.log")
 	generator = JsonFromGsheet()
 	generator.run(config_file=args["config"], gsheet=args["gsheet"])

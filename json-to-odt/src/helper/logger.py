@@ -7,6 +7,7 @@ import colorama
 
 # log level (0-TRACE, 1-DEBUG, 2-INFO, 3-WARN, 4-ERROR) below which logs will not be printed
 LOG_LEVEL = None
+LOG_FILE = None
 
 colorama.init()
 
@@ -17,6 +18,11 @@ log_color = {
     '[DEBUG]': {'color': 'green',       'highlight': None, 'attrs': None},
     '[TRACE]': {'color': 'light_grey',  'highlight': None, 'attrs': ['dark']}
 }
+
+def set_log_file(file_path):
+    global LOG_FILE
+    LOG_FILE = file_path
+
 
 def trace(msg, console=True, nesting_level=0):
     if LOG_LEVEL < 1:
@@ -39,6 +45,7 @@ def error(msg, console=True, nesting_level=0):
         log('[ERROR]', msg, console, nesting_level)
 
 def log(level, msg, console=True, nesting_level=0):
+    global LOG_FILE
     now = time.time()
     nesting_leader = ".." * nesting_level
     if nesting_leader != '':
@@ -46,6 +53,11 @@ def log(level, msg, console=True, nesting_level=0):
 
     data = {'type': level, 'time': datetime.now().isoformat(), 'msg': f"{nesting_leader}{msg}"}
 
+    text = f"{data['time']} {data['type']:<6} {data['msg']}"
+
     if console:
-        text = f"{data['time']} {data['type']:<6} {data['msg']}"
         print(colored(text, log_color[data['type']]['color'], log_color[data['type']]['highlight'], attrs=log_color[data['type']]['attrs']))
+
+    if LOG_FILE:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(text + '\n')

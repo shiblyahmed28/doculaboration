@@ -78,5 +78,6 @@ if __name__ == '__main__':
 	ap.add_argument("-j", "--json", required=False, help="json name to override json list provided in configuration")
 	args = vars(ap.parse_args())
 
+	logger.set_log_file("latex-from-json.log")
 	generator = LatexFromJson(args["config"], args["json"])
 	generator.run()

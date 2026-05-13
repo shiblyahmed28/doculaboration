@@ -78,5 +78,6 @@ if __name__ == '__main__':
 	ap.add_argument("-j", "--json", required=False, help="json name to override json list provided in configuration")
 	args = vars(ap.parse_args())
 
+	logger.set_log_file("context-from-json.log")
 	generator = ContextFromJson(args["config"], args["json"])
 	generator.run()
